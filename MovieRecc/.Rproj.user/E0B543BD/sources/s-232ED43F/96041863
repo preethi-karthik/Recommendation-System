@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1576018282768.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "96041863",
+    "lastKnownWriteTime" : 1576019645,
+    "last_content_update" : 1576019645639,
+    "path" : "~/MovieRecommendationSystem/Recommendation-System/MovieRecc/server.R",
+    "project_path" : "server.R",
+    "properties" : {
+        "cursorPosition" : "191,39",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

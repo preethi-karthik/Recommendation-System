@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1576001189387.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "2CDC162F",
+    "lastKnownWriteTime" : 1576001213,
+    "last_content_update" : 1576001213836,
+    "path" : "~/MovieRecommendationSystem/Recommendation-System/README.md",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "1,21",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "markdown"
+}

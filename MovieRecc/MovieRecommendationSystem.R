@@ -1,0 +1,62 @@
+#library(proxy)
+library(recommenderlab)
+library(reshape2)
+
+movies <- read.csv("movies.csv", header = TRUE, stringsAsFactors=FALSE)
+ratings <- read.csv("ratings.csv", header = TRUE)
+movies2 <- movies[-which((movies$movieId %in% ratings$movieId) == FALSE),]
+
+movie_recommendation <- function(movieInput1,movieInput2,movieInput3) {
+  #row_numM1 <- which(movies2[,2] == "Gladiator (2000)")
+  #row_numM2 <- which(movies2[,2] == "Aeon Flux (2005)")
+  #row_numM3 <- which(movies2[,2] == "Alexander (2004)")
+  # gets the input number of the movies 
+  row_numM1 <- which(movies2[,2] == movieInput1)
+  row_numM2 <- which(movies2[,2] == movieInput2)
+  row_numM3 <- which(movies2[,2] == movieInput3)
+
+  userSelect <- matrix(NA,10325)
+  userSelect[row_numM1] <- 5 #hard code first movie selection to rating 5
+  userSelect[row_numM2] <- 4 #hard code second movie selection to rating 4
+  userSelect[row_numM3] <- 3 #hard code third movie selection to rating 3
+  userSelect <- t(userSelect)
+  
+
+  ratingmat <- dcast(ratings, userId~movieId, value.var = "rating", na.rm=FALSE)
+  
+  ratingmat <- ratingmat[,-1]
+  #ratingmat
+  colnames(userSelect) <- colnames(ratingmat)
+  ratingmat2 <- rbind(userSelect,ratingmat)
+  ratingmat2 <- as.matrix(ratingmat2)
+  
+
+  ratingmat2 <- as(ratingmat2, "realRatingMatrix")
+
+
+  recommender_model <- Recommender(ratingmat2, method = "UBCF",param=list(method="Cosine",nn=30))
+  
+  recom <- predict(recommender_model, ratingmat2[1], n=10)
+  
+
+  recom_list <- as(recom, "list")
+
+  no_result <- data.frame(matrix(NA,1))
+  recom_result <- data.frame(matrix(NA,10))
+  as.character(recom_list[1])
+  if (as.character(recom_list[1])=='character(0)'){
+    no_result[1,1] <- "Sorry, there is not enough information in our database on the movies you've selected. Try to select different movies you like."
+    colnames(no_result) <- "No results"
+    return(no_result) 
+  } else {
+    for (i in c(1:10)){
+      recom_result[i,1] <- as.character(subset(movies, 
+                                               movies$movieId == as.integer(recom_list[[1]][i]))$title)
+    }
+    colnames(recom_result) <- "User-Based Collaborative Filtering Recommended movie Titles"
+    #recom_result
+    return(recom_result)
+    
+  }
+}
+

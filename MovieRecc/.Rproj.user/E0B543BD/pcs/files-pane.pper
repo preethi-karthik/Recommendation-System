@@ -1,0 +1,9 @@
+{
+    "path" : "~/MovieRecommendationSystem/Recommendation-System/MovieRecc",
+    "sortOrder" : [
+        {
+            "ascending" : true,
+            "columnIndex" : 2
+        }
+    ]
+}
