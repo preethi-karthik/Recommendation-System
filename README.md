@@ -1,2 +1,2 @@
 # Recommendation-System
-#changes from Rstudio
+#Tools & Packages Used : R Studio , R , Shiny , Recommender , Reshape2
