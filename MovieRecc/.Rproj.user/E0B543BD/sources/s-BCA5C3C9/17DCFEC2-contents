@@ -7,9 +7,9 @@ ratings <- read.csv("ratings.csv", header = TRUE)
 #Combining movie and rating DS and excluding uncommon movies between both files
 movies2 <- movies[-which((movies$movieId %in% ratings$movieId) == FALSE),]
 movie_recommendation <- function(movieInput1,movieInput2,movieInput3) {
-  row_numM1 <- which(movies2[,2] == "Gladiator (2000)")
-  row_numM2 <- which(movies2[,2] == "Aeon Flux (2005)")
-  row_numM3 <- which(movies2[,2] == "Alexander (2004)")
+  #row_numM1 <- which(movies2[,2] == "Good Will Hunting (1997)")
+  #row_numM2 <- which(movies2[,2] == "Inception (2010)")
+  #row_numM3 <- which(movies2[,2] == "Shutter Island (2010)")
   # gets the input number of the movies 
   row_numM1 <- which(movies2[,2] == movieInput1)
   row_numM2 <- which(movies2[,2] == movieInput2)

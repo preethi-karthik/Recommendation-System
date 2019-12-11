@@ -1,3 +1,5 @@
+# MOVIE RECOMMENDATION SYSTEM by : Preethi Prakash
+
 source("MovieRecommendationSystem.R")
 library(shiny)
 library(proxy)

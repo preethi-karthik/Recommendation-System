@@ -7,13 +7,13 @@
     "folds" : "",
     "hash" : "0",
     "id" : "C6916A36",
-    "lastKnownWriteTime" : 1576019669,
-    "last_content_update" : 1576019669273,
+    "lastKnownWriteTime" : 1576028539,
+    "last_content_update" : 1576028539993,
     "path" : "~/MovieRecommendationSystem/Recommendation-System/MovieRecc/ui.R",
     "project_path" : "ui.R",
     "properties" : {
-        "cursorPosition" : "23,31",
-        "scrollLine" : "20"
+        "cursorPosition" : "9,50",
+        "scrollLine" : "0"
     },
     "read_only" : false,
     "read_only_alternatives" : [

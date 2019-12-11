@@ -7,6 +7,8 @@
 #    http://shiny.rstudio.com/
 #
 # inspired by Jekaterina's Project on Movie Recommendation System 
+# MOVIE RECOMMENDATION SYSTEM by : Preethi Prakash
+
 library(shiny)
 
 genre <- c("Action", "Adventure", "Animation", "Children", 

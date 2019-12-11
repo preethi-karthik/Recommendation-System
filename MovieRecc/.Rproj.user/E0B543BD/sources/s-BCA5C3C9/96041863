@@ -7,12 +7,12 @@
     "folds" : "",
     "hash" : "0",
     "id" : "96041863",
-    "lastKnownWriteTime" : 1576019645,
-    "last_content_update" : 1576019645639,
+    "lastKnownWriteTime" : 1576028534,
+    "last_content_update" : 1576028534590,
     "path" : "~/MovieRecommendationSystem/Recommendation-System/MovieRecc/server.R",
     "project_path" : "server.R",
     "properties" : {
-        "cursorPosition" : "191,39",
+        "cursorPosition" : "1,0",
         "scrollLine" : "0"
     },
     "read_only" : false,
