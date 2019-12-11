@@ -1,0 +1,180 @@
+# Clear objects from the workspace in the environment panel.
+rm(list = ls())
+
+# Loading packages
+library(ggplot2) # used for ploting library
+library(cowplot)  # used for combining multiple plots 
+library(plyr)
+library(dplyr) # used for data manipulation and joining library
+library(psych)
+library(car)
+library(Metrics)
+library(forecast)
+library(purrr)
+library(data.table)
+library(caret)
+library(corrplot)
+library(e1071)
+library(xgboost)
+
+
+# Setting the seed so we get the same results same everytime
+set.seed(123)
+
+# Loading Train and Test dataset
+train <- read.csv("Train_bigmart_data.csv")
+test <- read.csv("Test_bigmart_data.csv")
+
+# Showing the dimension and structure of dataset
+dim(train);str(train)
+
+dim(test);str(test)
+
+# Feature or column names of Data
+names(train)
+
+# Checking the missing data
+sum(is.na(train))
+colSums(is.na(train))
+summary(train)
+
+# Insert Item_Outlet_Sales column to test data
+test$Item_Outlet_Sales <- NA
+
+# Combining train and test dataset so it will be easy for manipulation and pre-processing
+combi <- rbind(train, test)
+dim(combi)
+
+# Checking the combined missing data
+sum(is.na(combi))
+colSums(is.na(combi))
+summary(combi)
+
+# Displaying the missing data
+lapply(combi, function(x) length(unique(x))) 
+combi %>% map_dbl(~sum(is.na(.)))
+map_dbl(combi, ~sum((is.na(.) == T)/length(.))*100)
+
+## After univariate EDA
+ggplot(train) + geom_histogram(aes(train$Item_Outlet_Sales), binwidth = 100, fill = "darkgreen") +  xlab("Item Outlet Sales") + ylab("Frequency" )
+
+## Missing Value Treatment
+# Replacing Item_weight with mean weight
+missing_index = which(is.na(combi$Item_Weight)) 
+for(i in missing_index){ 
+  item = combi$Item_Identifier[i]
+  combi$Item_Weight[i] = mean(combi$Item_Weight[combi$Item_Identifier == item], na.rm = T) }
+
+# Recheck if there is any missing data
+sum(is.na(combi$Item_Weight))
+
+## After bivariate analysis
+# Replacing blank or missing values with "other" in Outlet_Size
+p1=ggplot(combi %>% group_by(Outlet_Size) %>% dplyr::summarise(Count = n())) +   geom_bar(aes(Outlet_Size, Count), stat = "identity", fill = "coral1") +  geom_label(aes(Outlet_Size, Count, label = Count), vjust = 0.5) +  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+levels(combi$Outlet_Size)[1] <- "Other"
+p2=ggplot(combi %>% group_by(Outlet_Size) %>% dplyr::summarise(Count = n())) +   geom_bar(aes(Outlet_Size, Count), stat = "identity", fill = "coral1") +  geom_label(aes(Outlet_Size, Count, label = Count), vjust = 0.5) +  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+plot_grid(p1, p2, nrow = 1)
+
+combi$Outlet_Size <- factor(combi$Outlet_Size, levels=c("Small","Medium","High","Other"), labels=c(1,2,3,4))
+combi$Outlet_Size=as.integer(as.character(combi$Outlet_Size))
+
+# Plot for Item_Fat_Content category
+p1=ggplot(combi %>% group_by(Item_Fat_Content) %>% dplyr::summarise(Count = n())) + 
+  geom_bar(aes(Item_Fat_Content, Count), stat = "identity", fill = "coral1") +
+  geom_label(aes(Item_Fat_Content, Count, label = Count), vjust = 0.5) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Combining 'LF', 'low fat', and 'Low Fat' into same category
+combi$Item_Fat_Content <- mapvalues(combi$Item_Fat_Content, from = c("LF", "low fat","reg"), to = c("Low Fat", "Low Fat","Regular"))
+table(combi$Item_Fat_Content)
+
+p2=ggplot(combi %>% group_by(Item_Fat_Content) %>% dplyr::summarise(Count = n())) +
+  geom_bar(aes(Item_Fat_Content, Count), stat = "identity", fill = "coral1") +
+  geom_label(aes(Item_Fat_Content, Count, label = Count), vjust = 0.5) + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Combined plot after merging into common category
+plot_grid(p1, p2, nrow = 1)
+
+# Replace Regular and Low fat with 1 & 0
+combi$Item_Fat_Content <- ifelse(combi$Item_Fat_Content == "Regular",1,0)
+
+# Item_Visibilty histogram
+ggplot(combi) + geom_histogram(aes(Item_Visibility), bins = 100,fill = "red")
+
+# Replace the zeroes in "Item_Visibility" by median as visibility cannot be 0
+combi$Item_Visibility <- ifelse(combi$Item_Visibility == 0,
+                                median(combi$Item_Visibility), combi$Item_Visibility)
+
+# Item_Visibilty histogram after removal of 0
+ggplot(combi) + geom_histogram(aes(Item_Visibility), bins = 100,fill = "red")
+
+## Feature Engineering
+
+# Classifying the categories of Item_type into perishable and non_perishable as per our understanding and make it into a new feature.
+# create a new feature 'Item_Type_Cat' 
+combi$Item_Type_Cat[combi$Item_Type %in% c("Breads", "Breakfast", "Dairy", "Fruits and Vegetables", "Meat", "Seafood")] <- 'perishable'
+combi$Item_Type_Cat[combi$Item_Type %in% c("Baking Goods", "Canned", "Frozen Foods", "Hard Drinks", "Health and Hygiene", "Household", "Soft Drinks")] <- 'non-perishable'
+combi$Item_Type_Cat[!(combi$Item_Type_Cat %in% c("perishable","non-perishable"))] <- 'other'
+
+#combi$Item_Type_Cat <- factor(combi$Item_Type_Cat)
+ggplot(combi) + geom_bar(aes(as.factor(Item_Type_Cat)), bins = 100,fill = "green")
+
+## Label encoding for the categorical variables
+# Replacing  Outlet_Type by 1,2,3 and 4
+combi$Outlet_Type <- factor(combi$Outlet_Type, levels=c("Grocery Store", "Supermarket Type1", "Supermarket Type2", "Supermarket Type3"), labels=c(0,1,2,3))
+combi$Outlet_Type=as.integer(as.character(combi$Outlet_Type))
+
+# Replacing  Outlet_Location_Type by 1,2 and 3
+combi$Outlet_Location_Type <- factor(combi$Outlet_Location_Type, levels=c("Tier 1","Tier 2","Tier 3"), labels=c(1,2,3))
+combi$Outlet_Location_Type=as.integer(as.character(combi$Outlet_Location_Type))
+
+# Removing the variables which is unnecessary
+combi = subset(combi,select=-c(Item_Identifier,Item_Type,Outlet_Identifier))
+
+# Data ready for model
+describe(combi)
+
+# Sampling the combined data "combi" back to train and test set.
+updated_train <- combi[1:nrow(train),]
+updated_test <- combi[-(1:nrow(train)),]
+
+#Build Linear Regression Model on traindata set
+linear_reg_mod=lm(Item_Outlet_Sales~Item_Weight+Item_Fat_Content+Item_Visibility+
+         Item_MRP+Outlet_Establishment_Year+Outlet_Size+Outlet_Location_Type+Outlet_Type, data=updated_train )
+summary(linear_reg_mod)
+
+# Item_weight is not significant variables
+linear_reg_mod2=lm(Item_Outlet_Sales~Item_Fat_Content+Item_Visibility+Item_MRP+Outlet_Establishment_Year+Outlet_Size+
+         Outlet_Location_Type+Outlet_Type, data=updated_train )
+summary(linear_reg_mod2)
+
+linear_reg_mod3=lm(log(Item_Outlet_Sales)~Item_Fat_Content+Item_Visibility+Item_MRP+Outlet_Establishment_Year+Outlet_Size+
+         Outlet_Location_Type+Outlet_Type, data=updated_train )
+summary(linear_reg_mod3)
+
+# After taking log, Item_Fat_Contant remove
+linear_reg_mod4=lm(Item_Outlet_Sales~Item_Visibility+Item_MRP+Outlet_Establishment_Year+Outlet_Size+Outlet_Location_Type+Outlet_Type, data=updated_train )
+summary(linear_reg_mod4)
+
+linear_reg_mod5=lm(log(Item_Outlet_Sales)~Item_Visibility+Item_MRP+Outlet_Establishment_Year+Outlet_Size+Outlet_Location_Type+Outlet_Type, data=updated_train )
+summary(linear_reg_mod5)
+
+# Testing for Multicollinearity
+vif(linear_reg_mod4)
+
+# Durbin Watson statistic
+durbinWatsonTest(linear_reg_mod4) 
+
+# Calculate RMSE
+rmse(updated_train$Item_Outlet_Sales, exp(linear_reg_mod4$fitted.values))
+rmse(updated_train$Item_Outlet_Sales, exp(linear_reg_mod5$fitted.values))
+
+# Prediction on test data using our model
+prediction=predict.lm(linear_reg_mod4, newdata=updated_test)
+a1=as.data.frame(prediction)
+View(a1)
+newdata=cbind(test,a1)
+
+predict_final= subset(newdata, select = -c(Item_Outlet_Sales))
+View(predict_final)

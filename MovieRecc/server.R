@@ -7,7 +7,9 @@ library(recommenderlab)
 library(reshape2)
 
 search <- read.csv("search.csv", stringsAsFactors=FALSE)
+
 ratings <- read.csv("ratings.csv", header = TRUE)
+
 search <- search[-which((search$movieId %in% ratings$movieId) == FALSE),]
 
 shinyServer(function(input, output) {
